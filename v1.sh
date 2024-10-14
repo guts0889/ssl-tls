@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cert="/etc/letsencrypt/live/doldrey.com/cert.pem"
+cert=""
 apache="apache2"
 nginx="nginx"
 
