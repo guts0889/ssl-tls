@@ -1,14 +1,19 @@
 #!/bin/bash
 
-cert=""
+cert="/etc/letsencrypt/live/doldrey.com/cert.pem"
 apache="apache2"
 nginx="nginx"
 
 # Función para obtener las fechas de expiración de todos los certificados en un archivo
 fechas_exp() {
-    # Extrae las fechas de expiración de cada certificado
-    openssl crl2pkcs7 -nocrl -certfile "$cert" | openssl pkcs7 -print_certs -noout | \
-    grep 'notAfter=' | sed 's/notAfter=//'
+    # Usamos awk para separar cada certificado y procesar uno por uno
+    awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"} /END CERTIFICATE/ {close("cert" c ".pem")}' "$cert"
+    
+    # Extraer la fecha de expiración de cada certificado temporal
+    for cert_file in cert*.pem; do
+        openssl x509 -enddate -noout -in "$cert_file" | sed 's/notAfter=//'
+        rm -f "$cert_file"  # Borrar archivo temporal
+    done
 }
 
 # Función para reiniciar servicios
